@@ -427,8 +427,7 @@
   <div class="print-header">
     <div class="print-header-top">
       <div>
-        <div class="print-title">FIRE SAFETY & EMERGENCY EXIT PLAN</div>
-        <div class="print-subtitle">THE LIGHT PARK STORE FACILITY</div>
+        <div class="print-title">THE LIGHT PARK STORE FACILITY</div>
         <div class="print-subtitle">687 N Harvey Mitchell Pkwy, Bryan, TX 77807</div>
       </div>
       <div class="print-meta">
@@ -621,14 +620,13 @@
         const pdf = new jsPDF('landscape', 'mm', 'letter');
         
         // Header
-        pdf.setFontSize(20);
+        pdf.setFontSize(16);
         pdf.setFont(undefined, 'bold');
-        pdf.text('FIRE SAFETY & EMERGENCY EXIT PLAN', 14, 20);
+        pdf.text('THE LIGHT PARK STORE FACILITY', 14, 20);
         
         pdf.setFontSize(12);
         pdf.setFont(undefined, 'normal');
-        pdf.text('THE LIGHT PARK STORE FACILITY', 14, 28);
-        pdf.text('687 N Harvey Mitchell Pkwy, Bryan, TX 77807', 14, 34);
+        pdf.text('687 N Harvey Mitchell Pkwy, Bryan, TX 77807', 14, 28);
         
         // Capture map with markers
         const mapWrapper = document.getElementById('mapWrapper');
@@ -643,10 +641,10 @@
         const imgWidth = pageWidth - 28;
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
         
-        pdf.addImage(imgData, 'JPEG', 14, 42, imgWidth, Math.min(imgHeight, 130));
+        pdf.addImage(imgData, 'JPEG', 14, 36, imgWidth, Math.min(imgHeight, 140));
         
         // Legend
-        const legendY = Math.min(42 + imgHeight + 10, 180);
+        const legendY = Math.min(36 + imgHeight + 10, 180);
         pdf.setFontSize(11);
         pdf.setFont(undefined, 'bold');
         pdf.text('LEGEND:', 14, legendY);
