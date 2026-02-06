@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Warehouse Safety Map</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     
@@ -415,6 +417,7 @@
       </button>
     </div>
     <div class="tools">
+      <button class="action-btn" onclick="downloadPDF()" id="pdfBtn">📄 Download PDF</button>
       <button class="action-btn" onclick="window.print()">🖨️ Print</button>
       <button class="action-btn danger" onclick="clearAll()">🗑️ Clear</button>
     </div>
@@ -609,6 +612,97 @@
       
       addMarker(x, y, currentTool);
     });
+    
+    // Download PDF function
+    async function downloadPDF() {
+      const btn = document.getElementById('pdfBtn');
+      btn.textContent = '⏳ Generating...';
+      btn.disabled = true;
+      
+      try {
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('landscape', 'mm', 'letter');
+        
+        // Header
+        pdf.setFontSize(20);
+        pdf.setFont(undefined, 'bold');
+        pdf.text('FIRE SAFETY & EMERGENCY EXIT PLAN', 14, 20);
+        
+        pdf.setFontSize(12);
+        pdf.setFont(undefined, 'normal');
+        pdf.text('THE LIGHT PARK STORE FACILITY', 14, 28);
+        pdf.text('687 N Harvey Mitchell Pkwy, Bryan, TX 77807', 14, 34);
+        
+        // Date
+        pdf.setFontSize(10);
+        pdf.text('Document #: SAFETY-001', 220, 20);
+        pdf.text('Rev. Date: ' + new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }), 220, 26);
+        
+        // Capture map with markers
+        const mapWrapper = document.getElementById('mapWrapper');
+        const canvas = await html2canvas(mapWrapper, { 
+          scale: 2,
+          useCORS: true,
+          backgroundColor: '#ffffff'
+        });
+        
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const imgWidth = pageWidth - 28;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        
+        pdf.addImage(imgData, 'JPEG', 14, 42, imgWidth, Math.min(imgHeight, 130));
+        
+        // Legend
+        const legendY = Math.min(42 + imgHeight + 10, 180);
+        pdf.setFontSize(11);
+        pdf.setFont(undefined, 'bold');
+        pdf.text('LEGEND:', 14, legendY);
+        
+        pdf.setFont(undefined, 'normal');
+        pdf.setFontSize(10);
+        
+        // Count markers
+        const counts = { extinguisher: 0, exit: 0, firstaid: 0 };
+        markers.forEach(m => counts[m.type]++);
+        
+        // Fire ext (red)
+        pdf.setFillColor(220, 38, 38);
+        pdf.rect(14, legendY + 3, 8, 8, 'F');
+        pdf.text(`Fire Extinguisher (${counts.extinguisher})`, 26, legendY + 9);
+        
+        // Exit (green)
+        pdf.setFillColor(22, 163, 74);
+        pdf.rect(80, legendY + 3, 8, 8, 'F');
+        pdf.text(`Emergency Exit (${counts.exit})`, 92, legendY + 9);
+        
+        // First aid (blue)
+        pdf.setFillColor(37, 99, 235);
+        pdf.rect(150, legendY + 3, 8, 8, 'F');
+        pdf.text(`First Aid Kit (${counts.firstaid})`, 162, legendY + 9);
+        
+        // Signature lines
+        const sigY = 195;
+        pdf.setDrawColor(0);
+        pdf.line(14, sigY, 80, sigY);
+        pdf.line(100, sigY, 166, sigY);
+        pdf.line(186, sigY, 252, sigY);
+        
+        pdf.setFontSize(9);
+        pdf.text('Safety Manager Signature', 14, sigY + 5);
+        pdf.text('Date Approved', 100, sigY + 5);
+        pdf.text('Insurance Representative', 186, sigY + 5);
+        
+        pdf.save('Light-Park-Safety-Plan.pdf');
+        
+      } catch (err) {
+        console.error('PDF generation failed:', err);
+        alert('PDF generation failed. Try using Print instead.');
+      }
+      
+      btn.textContent = '📄 Download PDF';
+      btn.disabled = false;
+    }
     
     // Load on start
     loadMarkers();
