@@ -100,13 +100,19 @@
       width: 100%;
       overflow: auto;
       background: #000;
-      touch-action: pan-x pan-y;
+    }
+    
+    .map-wrapper {
+      position: relative;
+      display: inline-block;
     }
     
     .map-image {
       display: block;
       max-width: 100%;
       height: auto;
+      user-select: none;
+      -webkit-user-drag: none;
     }
     
     .marker {
@@ -230,7 +236,9 @@
   </div>
   
   <div class="map-container" id="mapContainer">
-    <img src="warehouse.jpg" alt="Warehouse" class="map-image" id="mapImage">
+    <div class="map-wrapper" id="mapWrapper">
+      <img src="warehouse.jpg" alt="Warehouse" class="map-image" id="mapImage">
+    </div>
   </div>
   
   <div class="legend">
@@ -288,7 +296,7 @@
         }, 300);
       };
       
-      document.getElementById('mapContainer').appendChild(marker);
+      document.getElementById('mapWrapper').appendChild(marker);
       markers.push({ id: marker.dataset.id, x, y, type });
       saveMarkers();
       updateCounts();
@@ -321,7 +329,7 @@
             }, 300);
           };
           
-          document.getElementById('mapContainer').appendChild(marker);
+          document.getElementById('mapWrapper').appendChild(marker);
         });
         updateCounts();
       }
@@ -336,21 +344,32 @@
       }
     }
     
-    // Handle clicks on map
-    document.getElementById('mapContainer').addEventListener('click', (e) => {
-      if (e.target.classList.contains('marker')) return;
-      
-      const container = document.getElementById('mapContainer');
-      const img = document.getElementById('mapImage');
+    // Handle clicks on map image directly
+    document.getElementById('mapImage').addEventListener('click', (e) => {
+      e.preventDefault();
+      const img = e.target;
       const rect = img.getBoundingClientRect();
       
       // Calculate position as percentage of image
-      const x = ((e.clientX - rect.left + container.scrollLeft) / img.offsetWidth) * 100;
-      const y = ((e.clientY - rect.top + container.scrollTop) / img.offsetHeight) * 100;
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
       
-      if (x >= 0 && x <= 100 && y >= 0 && y <= 100) {
-        addMarker(x, y, currentTool);
-      }
+      addMarker(x, y, currentTool);
+    });
+    
+    // Handle touch on map image
+    document.getElementById('mapImage').addEventListener('touchend', (e) => {
+      if (e.touches.length > 0) return; // multi-touch, ignore
+      e.preventDefault();
+      
+      const touch = e.changedTouches[0];
+      const img = document.getElementById('mapImage');
+      const rect = img.getBoundingClientRect();
+      
+      const x = ((touch.clientX - rect.left) / rect.width) * 100;
+      const y = ((touch.clientY - rect.top) / rect.height) * 100;
+      
+      addMarker(x, y, currentTool);
     });
     
     // Load on start
