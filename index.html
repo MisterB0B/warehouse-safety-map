@@ -432,9 +432,6 @@
         <div class="print-subtitle">687 N Harvey Mitchell Pkwy, Bryan, TX 77807</div>
       </div>
       <div class="print-meta">
-        <strong>Document #: SAFETY-001</strong>
-        Rev. Date: <span id="printDate"></span><br>
-        Page 1 of 1
       </div>
     </div>
   </div>
@@ -632,11 +629,6 @@
         pdf.setFont(undefined, 'normal');
         pdf.text('THE LIGHT PARK STORE FACILITY', 14, 28);
         pdf.text('687 N Harvey Mitchell Pkwy, Bryan, TX 77807', 14, 34);
-        
-        // Date
-        pdf.setFontSize(10);
-        pdf.text('Document #: SAFETY-001', 220, 20);
-        pdf.text('Rev. Date: ' + new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }), 220, 26);
         
         // Capture map with markers
         const mapWrapper = document.getElementById('mapWrapper');
