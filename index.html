@@ -458,17 +458,6 @@
         <span>First Aid Kit (<span id="printCountAid">0</span>)</span>
       </div>
     </div>
-    <div class="print-footer">
-      <div>
-        <div class="signature-line">Safety Manager Signature</div>
-      </div>
-      <div>
-        <div class="signature-line">Date Approved</div>
-      </div>
-      <div>
-        <div class="signature-line">Insurance Representative</div>
-      </div>
-    </div>
   </div>
   
   <div class="legend">
@@ -670,18 +659,6 @@
         pdf.setFillColor(37, 99, 235);
         pdf.rect(150, legendY + 3, 8, 8, 'F');
         pdf.text(`First Aid Kit (${counts.firstaid})`, 162, legendY + 9);
-        
-        // Signature lines
-        const sigY = 195;
-        pdf.setDrawColor(0);
-        pdf.line(14, sigY, 80, sigY);
-        pdf.line(100, sigY, 166, sigY);
-        pdf.line(186, sigY, 252, sigY);
-        
-        pdf.setFontSize(9);
-        pdf.text('Safety Manager Signature', 14, sigY + 5);
-        pdf.text('Date Approved', 100, sigY + 5);
-        pdf.text('Insurance Representative', 186, sigY + 5);
         
         pdf.save('Light-Park-Safety-Plan.pdf');
         
