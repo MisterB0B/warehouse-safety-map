@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Warehouse Safety Map</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0B0D14;
+      color: #E2E8F0;
+      min-height: 100vh;
+    }
+    
+    .header {
+      background: rgba(15, 23, 42, 0.95);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      border-bottom: 2px solid rgba(0, 232, 123, 0.3);
+    }
+    
+    .title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #00e87b;
+    }
+    
+    .tools {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    
+    .tool-btn {
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    
+    .tool-btn.extinguisher {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: rgba(239, 68, 68, 0.5);
+      color: #ef4444;
+    }
+    
+    .tool-btn.exit {
+      background: rgba(34, 197, 94, 0.2);
+      border-color: rgba(34, 197, 94, 0.5);
+      color: #22c55e;
+    }
+    
+    .tool-btn.first-aid {
+      background: rgba(59, 130, 246, 0.2);
+      border-color: rgba(59, 130, 246, 0.5);
+      color: #3b82f6;
+    }
+    
+    .tool-btn.active {
+      transform: scale(1.05);
+      box-shadow: 0 0 20px currentColor;
+    }
+    
+    .tool-btn.extinguisher.active { background: rgba(239, 68, 68, 0.4); }
+    .tool-btn.exit.active { background: rgba(34, 197, 94, 0.4); }
+    .tool-btn.first-aid.active { background: rgba(59, 130, 246, 0.4); }
+    
+    .action-btn {
+      padding: 8px 14px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      background: rgba(148, 163, 184, 0.2);
+      color: #94a3b8;
+    }
+    
+    .action-btn:hover {
+      background: rgba(148, 163, 184, 0.3);
+      color: #E2E8F0;
+    }
+    
+    .action-btn.danger {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+    }
+    
+    .map-container {
+      position: relative;
+      width: 100%;
+      overflow: auto;
+      background: #000;
+      touch-action: pan-x pan-y;
+    }
+    
+    .map-image {
+      display: block;
+      max-width: 100%;
+      height: auto;
+    }
+    
+    .marker {
+      position: absolute;
+      font-size: 32px;
+      transform: translate(-50%, -50%);
+      cursor: pointer;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));
+      transition: transform 0.15s;
+      z-index: 10;
+    }
+    
+    .marker:hover {
+      transform: translate(-50%, -50%) scale(1.2);
+    }
+    
+    .marker.deleting {
+      animation: shake 0.3s;
+    }
+    
+    @keyframes shake {
+      0%, 100% { transform: translate(-50%, -50%) rotate(0); }
+      25% { transform: translate(-50%, -50%) rotate(-10deg); }
+      75% { transform: translate(-50%, -50%) rotate(10deg); }
+    }
+    
+    .legend {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background: rgba(15, 23, 42, 0.95);
+      padding: 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      font-size: 14px;
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    
+    .legend-item:last-child {
+      margin-bottom: 0;
+    }
+    
+    .legend-icon {
+      font-size: 24px;
+    }
+    
+    .instructions {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(15, 23, 42, 0.95);
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #64748b;
+      max-width: 250px;
+    }
+    
+    .count-badge {
+      font-size: 12px;
+      margin-left: 4px;
+      opacity: 0.7;
+    }
+    
+    @media print {
+      .header, .legend, .instructions { display: none !important; }
+      body { background: white; }
+      .map-container { overflow: visible; }
+      .marker { font-size: 28px; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+    }
+    
+    @media (max-width: 600px) {
+      .header {
+        padding: 10px;
+      }
+      .title {
+        font-size: 14px;
+        width: 100%;
+      }
+      .tool-btn {
+        padding: 8px 12px;
+        font-size: 14px;
+      }
+      .legend {
+        bottom: auto;
+        top: 70px;
+        left: 10px;
+        padding: 10px;
+        font-size: 12px;
+      }
+      .instructions {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="title">🏭 Warehouse Safety Map</div>
+    <div class="tools">
+      <button class="tool-btn extinguisher active" onclick="setTool('extinguisher')" id="btn-extinguisher">
+        🧯 <span class="count-badge" id="count-extinguisher">0</span>
+      </button>
+      <button class="tool-btn exit" onclick="setTool('exit')" id="btn-exit">
+        🚪 <span class="count-badge" id="count-exit">0</span>
+      </button>
+      <button class="tool-btn first-aid" onclick="setTool('firstaid')" id="btn-firstaid">
+        🩹 <span class="count-badge" id="count-firstaid">0</span>
+      </button>
+    </div>
+    <div class="tools">
+      <button class="action-btn" onclick="window.print()">🖨️ Print</button>
+      <button class="action-btn danger" onclick="clearAll()">🗑️ Clear</button>
+    </div>
+  </div>
+  
+  <div class="map-container" id="mapContainer">
+    <img src="warehouse.jpg" alt="Warehouse" class="map-image" id="mapImage">
+  </div>
+  
+  <div class="legend">
+    <div class="legend-item"><span class="legend-icon">🧯</span> Fire Extinguisher</div>
+    <div class="legend-item"><span class="legend-icon">🚪</span> Exit Door</div>
+    <div class="legend-item"><span class="legend-icon">🩹</span> First Aid Kit</div>
+  </div>
+  
+  <div class="instructions">
+    <strong>Tap map</strong> to add marker<br>
+    <strong>Tap marker</strong> to delete it<br>
+    Auto-saves as you go
+  </div>
+
+  <script>
+    let currentTool = 'extinguisher';
+    let markers = [];
+    
+    const ICONS = {
+      extinguisher: '🧯',
+      exit: '🚪',
+      firstaid: '🩹'
+    };
+    
+    function setTool(tool) {
+      currentTool = tool;
+      document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
+      document.getElementById('btn-' + tool).classList.add('active');
+    }
+    
+    function updateCounts() {
+      const counts = { extinguisher: 0, exit: 0, firstaid: 0 };
+      markers.forEach(m => counts[m.type]++);
+      Object.keys(counts).forEach(type => {
+        document.getElementById('count-' + type).textContent = counts[type];
+      });
+    }
+    
+    function addMarker(x, y, type) {
+      const marker = document.createElement('div');
+      marker.className = 'marker';
+      marker.textContent = ICONS[type];
+      marker.style.left = x + '%';
+      marker.style.top = y + '%';
+      marker.dataset.id = Date.now() + Math.random();
+      
+      marker.onclick = (e) => {
+        e.stopPropagation();
+        marker.classList.add('deleting');
+        setTimeout(() => {
+          markers = markers.filter(m => m.id !== marker.dataset.id);
+          marker.remove();
+          saveMarkers();
+          updateCounts();
+        }, 300);
+      };
+      
+      document.getElementById('mapContainer').appendChild(marker);
+      markers.push({ id: marker.dataset.id, x, y, type });
+      saveMarkers();
+      updateCounts();
+    }
+    
+    function saveMarkers() {
+      localStorage.setItem('warehouseSafetyMarkers', JSON.stringify(markers));
+    }
+    
+    function loadMarkers() {
+      const saved = localStorage.getItem('warehouseSafetyMarkers');
+      if (saved) {
+        markers = JSON.parse(saved);
+        markers.forEach(m => {
+          const marker = document.createElement('div');
+          marker.className = 'marker';
+          marker.textContent = ICONS[m.type];
+          marker.style.left = m.x + '%';
+          marker.style.top = m.y + '%';
+          marker.dataset.id = m.id;
+          
+          marker.onclick = (e) => {
+            e.stopPropagation();
+            marker.classList.add('deleting');
+            setTimeout(() => {
+              markers = markers.filter(mk => mk.id !== m.id);
+              marker.remove();
+              saveMarkers();
+              updateCounts();
+            }, 300);
+          };
+          
+          document.getElementById('mapContainer').appendChild(marker);
+        });
+        updateCounts();
+      }
+    }
+    
+    function clearAll() {
+      if (confirm('Clear all markers?')) {
+        markers = [];
+        document.querySelectorAll('.marker').forEach(m => m.remove());
+        saveMarkers();
+        updateCounts();
+      }
+    }
+    
+    // Handle clicks on map
+    document.getElementById('mapContainer').addEventListener('click', (e) => {
+      if (e.target.classList.contains('marker')) return;
+      
+      const container = document.getElementById('mapContainer');
+      const img = document.getElementById('mapImage');
+      const rect = img.getBoundingClientRect();
+      
+      // Calculate position as percentage of image
+      const x = ((e.clientX - rect.left + container.scrollLeft) / img.offsetWidth) * 100;
+      const y = ((e.clientY - rect.top + container.scrollTop) / img.offsetHeight) * 100;
+      
+      if (x >= 0 && x <= 100 && y >= 0 && y <= 100) {
+        addMarker(x, y, currentTool);
+      }
+    });
+    
+    // Load on start
+    loadMarkers();
+  </script>
+</body>
+</html>
