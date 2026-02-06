@@ -271,11 +271,108 @@
       opacity: 0.7;
     }
     
+    /* Print Document Styling */
+    .print-header {
+      display: none;
+      background: #fff;
+      color: #000;
+      padding: 30px 40px;
+      border-bottom: 3px solid #000;
+    }
+    
+    .print-header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+    
+    .print-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #000;
+    }
+    
+    .print-subtitle {
+      font-size: 14px;
+      color: #333;
+      margin-top: 4px;
+    }
+    
+    .print-meta {
+      text-align: right;
+      font-size: 12px;
+      color: #333;
+    }
+    
+    .print-meta strong {
+      display: block;
+      font-size: 14px;
+      color: #000;
+    }
+    
+    .print-legend {
+      display: none;
+      background: #fff;
+      color: #000;
+      padding: 20px 40px;
+      border-top: 2px solid #000;
+    }
+    
+    .print-legend-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    
+    .print-legend-items {
+      display: flex;
+      gap: 40px;
+      margin-bottom: 20px;
+    }
+    
+    .print-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+    }
+    
+    .print-legend-box {
+      width: 20px;
+      height: 20px;
+      border: 2px solid #000;
+    }
+    
+    .print-legend-box.ext { background: #dc2626; }
+    .print-legend-box.exit { background: #16a34a; }
+    .print-legend-box.aid { background: #2563eb; }
+    
+    .print-footer {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #ccc;
+      font-size: 11px;
+    }
+    
+    .signature-line {
+      width: 200px;
+      border-top: 1px solid #000;
+      padding-top: 4px;
+      margin-top: 30px;
+    }
+    
     @media print {
+      body { background: white !important; margin: 0; }
       .header, .legend, .instructions { display: none !important; }
-      body { background: white; }
+      .print-header, .print-legend { display: block !important; }
       .map-container { overflow: visible; }
-      .marker { font-size: 28px; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      .map-image { max-width: 100%; }
+      .marker { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      .marker-icon { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      .marker-label { font-size: 8px; }
     }
     
     @media (max-width: 600px) {
@@ -323,9 +420,55 @@
     </div>
   </div>
   
+  <!-- Print Header (shows only when printing) -->
+  <div class="print-header">
+    <div class="print-header-top">
+      <div>
+        <div class="print-title">FIRE SAFETY & EMERGENCY EXIT PLAN</div>
+        <div class="print-subtitle">Light Bright LC — Warehouse Facility</div>
+        <div class="print-subtitle">4501 Mills Park Circle, College Station, TX 77845</div>
+      </div>
+      <div class="print-meta">
+        <strong>Document #: SAFETY-001</strong>
+        Rev. Date: <span id="printDate"></span><br>
+        Page 1 of 1
+      </div>
+    </div>
+  </div>
+
   <div class="map-container" id="mapContainer">
     <div class="map-wrapper" id="mapWrapper">
       <img src="warehouse.jpg" alt="Warehouse" class="map-image" id="mapImage">
+    </div>
+  </div>
+  
+  <!-- Print Legend & Footer (shows only when printing) -->
+  <div class="print-legend">
+    <div class="print-legend-title">LEGEND</div>
+    <div class="print-legend-items">
+      <div class="print-legend-item">
+        <div class="print-legend-box ext"></div>
+        <span>Fire Extinguisher (<span id="printCountExt">0</span>)</span>
+      </div>
+      <div class="print-legend-item">
+        <div class="print-legend-box exit"></div>
+        <span>Emergency Exit (<span id="printCountExit">0</span>)</span>
+      </div>
+      <div class="print-legend-item">
+        <div class="print-legend-box aid"></div>
+        <span>First Aid Kit (<span id="printCountAid">0</span>)</span>
+      </div>
+    </div>
+    <div class="print-footer">
+      <div>
+        <div class="signature-line">Safety Manager Signature</div>
+      </div>
+      <div>
+        <div class="signature-line">Date Approved</div>
+      </div>
+      <div>
+        <div class="signature-line">Insurance Representative</div>
+      </div>
     </div>
   </div>
   
@@ -364,6 +507,12 @@
       Object.keys(counts).forEach(type => {
         document.getElementById('count-' + type).textContent = counts[type];
       });
+      // Update print counts
+      document.getElementById('printCountExt').textContent = counts.extinguisher;
+      document.getElementById('printCountExit').textContent = counts.exit;
+      document.getElementById('printCountAid').textContent = counts.firstaid;
+      // Update print date
+      document.getElementById('printDate').textContent = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
     }
     
     function addMarker(x, y, type) {
